@@ -26,14 +26,19 @@ class Item(BaseModel):
     image: Optional[Image] = None
 
 
-class UserIn(BaseModel):
+class UserBase(BaseModel):
     username: str
+    email: EmailStr
+    full_name: Optional[str] = None
+
+
+class UserIn(UserBase):
     password: str
-    email: EmailStr
-    full_name: Optional[str] = None
 
 
-class UserOut(BaseModel):
-    username: str
-    email: EmailStr
-    full_name: Optional[str] = None
+class UserInDb(UserBase):
+    hashed_password: str
+
+
+class UserOut(UserBase):
+    pass

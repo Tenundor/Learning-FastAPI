@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import Cookie, FastAPI, Header, Path
 
 from schemas import ModelName, Item, UserIn, UserOut
+from services import fake_save_user
 
 app = FastAPI()
 
@@ -60,4 +61,5 @@ async def read_user_item(
 
 @app.post("/user/", response_model=UserOut)
 async def create_user(user: UserIn):
-    return user
+    saved_user = fake_save_user(user)
+    return saved_user
