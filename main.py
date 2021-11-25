@@ -1,7 +1,9 @@
 from typing import Optional
 
 from fastapi import Cookie, FastAPI, Header, Path
+from fastapi.encoders import jsonable_encoder
 
+from json_database import items
 from schemas import ModelName, Item, UserIn, UserOut
 from services import fake_save_user
 
@@ -14,7 +16,7 @@ async def root():
 
 
 @app.put("/items/{item_id}")
-async def update_item(
+async def replace_item(
         *,
         item_id: int = Path(..., title="The ID of the item to get", ge=0, le=1000),
         q: Optional[str] = None,
@@ -32,6 +34,16 @@ async def update_item(
     if user_agent:
         results.update({"user_agent": user_agent})
     return results
+
+
+@app.patch("/items/{item_id}", response_model=Item)
+async def update_item(item_id: str, item: Item):
+    stored_item_data = items[item_id]
+    stored_item_model = Item(**stored_item_data)
+    update_data = item.dict(exclude_unset=True)
+    updated_item = stored_item_model.copy(update=update_data)
+    items[item_id] = jsonable_encoder(updated_item)
+    return updated_item
 
 
 @app.get("/models/{model_name}")
