@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import Cookie, Depends, FastAPI, Header, Path
+from fastapi import Cookie, Depends, FastAPI, Header, HTTPException, Path
 from fastapi.encoders import jsonable_encoder
 
 from json_database import items, fake_items_db
@@ -15,6 +15,17 @@ class CommonQueryParams:
         self.q = q
         self.skip = skip
         self.limit = limit
+
+
+async def verify_token(x_token: str = Header(...)):
+    if x_token != "fake-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+async def verify_key(x_key: str = Header(...)):
+    if x_key != "fake-secret-key":
+        raise HTTPException(status_code=400, detail="X-Key header invalid")
+    return x_key
 
 
 @app.get("/")
@@ -53,7 +64,7 @@ async def update_item(item_id: str, item: Item):
     return updated_item
 
 
-@app.get("/items/")
+@app.get("/items/", dependencies=[Depends(verify_token), Depends(verify_key)])
 async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
     return commons
 
