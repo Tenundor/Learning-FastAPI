@@ -3,16 +3,18 @@ from typing import Optional
 from fastapi import Cookie, Depends, FastAPI, Header, Path
 from fastapi.encoders import jsonable_encoder
 
-from json_database import items
+from json_database import items, fake_items_db
 from schemas import ModelName, Item, UserIn, UserOut
 from services import fake_save_user
 
 app = FastAPI()
 
 
-async def common_parameters(q: Optional[str] = None, skip: int = 0,
-                            limit: int = 10):
-    return {"q": q, "skip": skip, "limit": limit}
+class CommonQueryParams:
+    def __init__(self, q: Optional[str] = None, skip: int = 0, limit: int = 10):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
 
 
 @app.get("/")
@@ -52,7 +54,7 @@ async def update_item(item_id: str, item: Item):
 
 
 @app.get("/items/")
-async def read_items(commons: dict = Depends(common_parameters)):
+async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
     return commons
 
 
@@ -82,7 +84,7 @@ async def read_user_item(
 
 
 @app.get("/users/")
-async def read_users(commons: dict = Depends(common_parameters)):
+async def read_users(commons: CommonQueryParams = Depends()):  # Shortcut
     return commons
 
 
