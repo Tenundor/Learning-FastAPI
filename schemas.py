@@ -30,6 +30,7 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
     full_name: Optional[str] = None
+    disabled: Optional[bool] = None
 
 
 class UserIn(UserBase):
