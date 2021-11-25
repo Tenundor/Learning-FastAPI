@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import Cookie, FastAPI, Header, Path
+from fastapi import Cookie, Depends, FastAPI, Header, Path
 from fastapi.encoders import jsonable_encoder
 
 from json_database import items
@@ -8,6 +8,11 @@ from schemas import ModelName, Item, UserIn, UserOut
 from services import fake_save_user
 
 app = FastAPI()
+
+
+async def common_parameters(q: Optional[str] = None, skip: int = 0,
+                            limit: int = 10):
+    return {"q": q, "skip": skip, "limit": limit}
 
 
 @app.get("/")
@@ -46,6 +51,11 @@ async def update_item(item_id: str, item: Item):
     return updated_item
 
 
+@app.get("/items/")
+async def read_items(commons: dict = Depends(common_parameters)):
+    return commons
+
+
 @app.get("/models/{model_name}")
 async def get_model(model_name: ModelName):
     if model_name == ModelName.alexnet:
@@ -69,6 +79,11 @@ async def read_user_item(
             {"description": "Это удивительная позиция, имеющая длинное описание"}
         )
     return item
+
+
+@app.get("/users/")
+async def read_users(commons: dict = Depends(common_parameters)):
+    return commons
 
 
 @app.post("/user/", response_model=UserOut)
